@@ -11,16 +11,14 @@ find_package(catkin REQUIRED COMPONENTS
 include_directories(${catkin_INCLUDE_DIRS})
 
 # motor
-include_directories(${PROJECT_SOURCE_DIR}/../include)
-include_directories(thirdparty/)
-include_directories(include/)
-include_directories(include/nlohmann)
-link_directories(${PROJECT_SOURCE_DIR}/../lib)
-
-include_directories(${PROJECT_SOURCE_DIR}/../thirdparty)
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/thirdparty)
 include_directories(/eigen)
 
 add_executable(gr1_motor_pctl
-      ${PROJECT_SOURCE_DIR}/src/demo_muti_motor.cpp
+      ${PROJECT_SOURCE_DIR}/src/gr1_motor_pctl.cpp
 )
 
+target_link_libraries(gr1_motor_pctl 
+                      ${PROJECT_SOURCE_DIR}/lib/libfsasdk.so 
+                      pthread)
