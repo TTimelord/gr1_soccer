@@ -5,17 +5,17 @@
 
 int main(){
   torch::jit::script::Module module;
-  module = torch::jit::load("../policy_box/policy_bl.pt"); 
-  
-
-  std::vector<torch::jit::IValue> inputs;
-  inputs.push_back(torch::rand({1, 705}));
-  
-  auto start = std::chrono::high_resolution_clock::now();  
-  at::Tensor output = module.forward(inputs).toTensor();
+  module = torch::jit::load("../policy_box/policy_bl.pt");   
+  at::Tensor output;
+  auto start = std::chrono::high_resolution_clock::now();
+  for(int i = 0; i < 10000; i ++){  
+     std::vector<torch::jit::IValue> inputs;
+     inputs.push_back(torch::rand({1, 705}));
+     output = module.forward(inputs).toTensor();
+  }
   auto end = std::chrono::high_resolution_clock::now();
   std::cout << output << std::endl;
   
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
   std::cout << "Program took " << duration << " seconds to run." << std::endl;
 }
