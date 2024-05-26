@@ -16,6 +16,6 @@ int main(){
   auto end = std::chrono::high_resolution_clock::now();
   std::cout << output << std::endl;
   
-  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Program took " << duration << " milliseconds to run." << std::endl;
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
+  std::cout << "Program took " << duration << " seconds to run." << std::endl;
 }
