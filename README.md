@@ -10,4 +10,4 @@
 
 ## install
 
-1. catin build
+1. catkin build
