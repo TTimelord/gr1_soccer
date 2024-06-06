@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>rl_s2r</name>
+    <version>0.0.0</version>
+    <description>rl controller for gr1</description>
+    <maintainer email="19807733522@163.com">zjy</maintainer>
+
+    <license>BSD</license>
+    <author email="19807733522@163.com">zjy</author>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>cmake_clang_tools</build_depend>
+    <!-- <depend>dynamic_reconfigure</depend> -->
+</package>

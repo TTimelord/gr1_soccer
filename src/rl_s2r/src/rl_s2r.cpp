@@ -3,9 +3,9 @@
 #include <iostream>
 #include <chrono>
 
-int main(){
+int main(int argc, char** argv){
   torch::jit::script::Module module;
-  module = torch::jit::load("../policy_box/policy_bl.pt");   
+  module = torch::jit::load(std::string(POLICY_PATH) + "/policy_bl.pt");   
   at::Tensor output;
   auto start = std::chrono::high_resolution_clock::now();
   for(int i = 0; i < 10000; i ++){  
