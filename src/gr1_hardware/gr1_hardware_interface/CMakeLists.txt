@@ -9,7 +9,6 @@ find_package(catkin REQUIRED
         legged_hw
         fsasdk
         fsesdk
-        ocs2_core
         # dynamic_reconfigure
         )
 find_package(Threads REQUIRED)
@@ -29,7 +28,6 @@ catkin_package(
                 legged_hw
                 fsasdk
                 fsesdk
-                ocs2_core
                 # dynamic_reconfigure
 )
 

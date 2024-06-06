@@ -1,5 +1,7 @@
 # RL walking and kicking 
 
+> gr1 hardware interface from Ma Liqian
+
 ## depends
 
 1. ubuntu 20.04
@@ -8,4 +10,4 @@
 
 ## install
 
-1.  
+1. catin build

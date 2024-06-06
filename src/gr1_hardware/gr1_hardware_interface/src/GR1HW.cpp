@@ -2,7 +2,6 @@
 #include <string>
 #include <nlohmann/json.hpp>  // Include the JSON library header
 #include <fstream>            // For file operations
-#include <ocs2_core/misc/LoadData.h>
 #include <chrono>
 #include <thread>
 #include <FsaConfig.h>
@@ -31,7 +30,6 @@ bool GR1HW::init(ros::NodeHandle& root_nh, ros::NodeHandle& robot_hw_nh) {
   }
 
   default_joint_pos.setZero(TOTAL_JOINT_NUM+3); // leg + waist
-  ocs2::loadData::loadEigenMatrix(referenceFile, "defaultJointState", default_joint_pos);
 
   setupJoints();
   setupImu();
