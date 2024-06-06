@@ -18,6 +18,6 @@ class GR1S2R
     public:
         GR1S2R();
         ~GR1S2R();
-        void get_inputs(std::vector<double>& vector_inputs);
-        std::vector<double> get_output();
+        void get_inputs(std::vector<float>& vector_inputs);
+        std::vector<float> get_output();
 };

@@ -7,18 +7,17 @@ GR1S2R::GR1S2R() {
 
 GR1S2R::~GR1S2R() {}
 
-void GR1S2R::get_inputs(std::vector<double>& vector_inputs)
+void GR1S2R::get_inputs(std::vector<float>& vector_inputs)
 {
-  //this->rl_policy_inputs.push_back(torch::rand({1, 705}));
-  at::Tensor tensor_inputs = at::from_blob(vector_inputs.data(), {1,705} ,at::TensorOptions().dtype(at::kDouble)).clone();
+  at::Tensor tensor_inputs = at::from_blob(vector_inputs.data(), {1,705} ,at::TensorOptions().dtype(at::kFloat));
   this->rl_policy_inputs.push_back(tensor_inputs);  
 }
 
-std::vector<double> GR1S2R::get_output()
+std::vector<float> GR1S2R::get_output()
 {
   this->rl_policy_output = this->rl_policy_module.forward(this->rl_policy_inputs).toTensor();
-  std::vector<double> vector_output(this->rl_policy_output.data_ptr<double>(), 
-                                    this->rl_policy_output.data_ptr<double>() + this->rl_policy_output.numel());
+  std::vector<float> vector_output(this->rl_policy_output.data_ptr<float>(), 
+                                    this->rl_policy_output.data_ptr<float>() + this->rl_policy_output.numel());
   this->rl_policy_inputs.pop_back();
   return vector_output;
 
@@ -31,8 +30,8 @@ void GR1S2R::caculate_and_record()
 
 int main(int argc, char** argv){
   GR1S2R model;
-  std::vector<double> test_data(1,705);
-  std::vector<double> outs_data(1,705);
+  std::vector<float> test_data(705, 0.0);
+  std::vector<float> outs_data(705);
   auto start = std::chrono::high_resolution_clock::now();
   for(int i = 0; i < 10000; i ++){  
       model.get_inputs(test_data);
@@ -42,5 +41,5 @@ int main(int argc, char** argv){
   std::cout << outs_data << std::endl;
   
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-  std::cout << "Program took " << duration << " seconds to run." << std::endl;
+  std::cout << "Program took " << duration << " millseconds to run." << std::endl;
 }
