@@ -1,2 +1,11 @@
-1. Go to initial configuration (position control)
-2. Start controllers
+# RL walking and kicking 
+
+## depends
+
+1. ubuntu 20.04
+2. libtorch cpu
+3. rapidjson
+
+## install
+
+1.  

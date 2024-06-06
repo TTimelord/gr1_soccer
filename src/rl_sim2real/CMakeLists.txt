@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(test-libtorch)
 
-set(Torch_DIR ~/libtorch/share/cmake/Torch)  #你解压的libtorch的绝对路径
+set(Torch_DIR ~/libtorch/share/cmake/Torch)  
+# set(Torch_DIR ${PROJECT_SOURCE_DIR}/libtorch/share/cmake/Torch) 
+
 find_package(Torch REQUIRED)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
