@@ -7,7 +7,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/include/fsa_sdk)
 include_directories(${PROJECT_SOURCE_DIR}/include/fse_sdk)
 include_directories(${PROJECT_SOURCE_DIR}/ThirdParty)
-
 include_directories(/usr/include/eigen3)
 
 
@@ -23,7 +22,10 @@ add_library(${PROJECT_NAME} SHARED
 
 target_link_libraries(${PROJECT_NAME}
         ${catkin_LIBRARIES}
-        #${Threads_LIBRARIES}
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/parallel_ankle/libParallelAnkle.so
         pthread
+        )
+
+install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}
         )

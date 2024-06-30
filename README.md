@@ -8,6 +8,16 @@
 
 ## install
 
+1. sdk_build
+
+```shell
+cd gr1_sdk
+mkdir build
+cd build
+cmake ..
+make install
+```
+
 
 ## else
 
