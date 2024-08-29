@@ -10,8 +10,20 @@
 6. items in requirements.txt
 
 ## install
+1. conda env
 
-1. sdk_build
+```shell
+conda create -n thmos-gr1-deploy python=3.10
+conda activate thmos-gr1-deploy
+pip install -r ./requirements.txt
+```
+
+2. copy .so
+```shell
+sudo cp /thmos_gr1/GR1HW/lib/parallel_ankle/libParallelAnkle.so /usr/lib/libParallelAnkle.so
+```
+
+3. sdk build
 
 ```shell
 cd gr1_sdk
@@ -21,13 +33,6 @@ cmake ..
 make install
 ```
 
- 2. conda env
-
-```shell
-conda create -n thmos-gr1-deploy python=3.10
-conda activate thmos-gr1-deploy
-pip install -r ./requirements.txt
-```
 ## demo
 
 1. PrintRobotStates.py : Read robot sensors data.
