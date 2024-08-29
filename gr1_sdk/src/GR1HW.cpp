@@ -9,7 +9,6 @@
 // #define ESTIMATION_ONLY
 // #define TIMER
 
-namespace legged {
 
 bool GR1HW::init() {
   default_joint_pos.setZero(TOTAL_JOINT_NUM+3); // leg + waist
@@ -420,5 +419,4 @@ double GR1HW::current_to_torque(int index, double current){
 GR1HW:: ~GR1HW(){
 }
 
-}
 

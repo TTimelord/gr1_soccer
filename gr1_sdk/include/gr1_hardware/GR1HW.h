@@ -5,18 +5,16 @@
 #include <Fsa.h>
 #include <main.h>
 #include <Eigen/Dense>
+#include <pybind11/pybind11.h>
+namespace py = pybind11;
 
 #define TOTAL_JOINT_NUM 12  // total number of joints for legs
 #define JOINT_NUM 6 // number of joints per leg
 #define PI 3.141592
 
-// #include <dynamic_reconfigure/server.h>
-
-namespace legged {
-
 // "RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT" 
 // fr fl rr rl
-// const std::vector<std::string> CONTACT_SENSOR_NAMES = {"RF_FOOT", "LF_FOOT", "RH_FOOT", "LH_FOOT"};
+
 
 struct MotorData {
   double pos_, vel_, tau_;                 // state
@@ -37,26 +35,8 @@ class GR1HW
 {
   public:
   bool init() ;
-  /** \brief Communicate with hardware. Get data, status of robot.
-   *
-   * Call @ref UNITREE_LEGGED_SDK::UDP::Recv() to get robot's state.
-   *
-   * @param time Current time
-   * @param period Current time - last time
-   */
   void read();
-
-  /** \brief Comunicate with hardware. Publish command to robot.
-   *
-   * Propagate joint state to actuator state for the stored
-   * transmission. Limit cmd_effort into suitable value. Call @ref UNITREE_LEGGED_SDK::UDP::Recv(). Publish actuator
-   * current state.
-   *
-   * @param time Current time
-   * @param period Current time - last time
-   */
   void write();
-
   ~GR1HW();
 
 private:
@@ -139,6 +119,9 @@ private:
 };
 
 
+PYBIND11_MODULE(gr1_sdk, m){
+    py::class_<GR1HW>(m, "GR1")
+        .def(py::init<>())
+        //.def("read", &GR1HW::read)
+        //.def("write", &GR1HW::read);
 }
-
-
