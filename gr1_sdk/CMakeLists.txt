@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(gr1sdk)
+project(gr1_sdk)
 
 find_package(Threads REQUIRED)
 
@@ -21,11 +21,10 @@ add_library(${PROJECT_NAME} SHARED
             src/GR1HW.cpp)
 
 target_link_libraries(${PROJECT_NAME}
-        ${catkin_LIBRARIES}
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/parallel_ankle/libParallelAnkle.so
         pthread
         )
 
 install(TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}
+        LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/..
         )

@@ -13,8 +13,7 @@ namespace legged {
 
 bool GR1HW::init() {
   default_joint_pos.setZero(TOTAL_JOINT_NUM+3); // leg + waist
-   imu.initIMU();
-
+  imu.initIMU();
 
   // ================== set PID params ======================
   ifstream ifs(motorlistFile);

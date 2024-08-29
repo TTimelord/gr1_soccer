@@ -5,6 +5,8 @@
 1. ubuntu 20.04
 2. eigen3
 3. rapidjson
+4. anaconda
+5. items in requirements.txt
 
 ## install
 
@@ -17,6 +19,21 @@ cd build
 cmake ..
 make install
 ```
+
+## conda env
+```shell
+conda create -n thmos-gr1-deploy python=3.11
+conda activate thmos-gr1-deploy
+pip install -r ./requirements.txt
+```
+
+## demo
+
+1. PrintRobotStates.py : Read robot sensors data.
+
+2. GotoDefaultPos.py : Robot stand with default pos. (Also can check motors)
+
+3. Deploy.py : RL policy deploy.
 
 
 ## else
