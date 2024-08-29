@@ -33,11 +33,17 @@ struct ImuData {
 
 class GR1HW 
 {
-  public:
-  bool init() ;
-  std::vector<double>  read();
+
+public:
+  GR1HW(){};
+
+  bool setup_robot();
+  std::vector<double> read();
+
   void write_pos(std::vector<double> target_position);
   void write_tor(std::vector<double> target_torque);
+
+  bool disable_all_motors();
   ~GR1HW();
 
 private:
@@ -52,8 +58,6 @@ private:
 
   double torque_to_current(int index, double torque);
   double current_to_torque(int index, double torque);
-
-  bool disable_all_motors();
   
   std::string referenceFile;
   std::string motorlistFile;
@@ -117,9 +121,10 @@ private:
 };
 
 
-PYBIND11_MODULE(gr1_sdk, m){
-    py::class_<GR1HW>(m, "GR1")
-        .def(py::init<>());
-        //.def("read", &GR1HW::read)
-        //.def("write", &GR1HW::read);
-}
+PYBIND11_MODULE(GR1HW, m){
+    py::class_<GR1HW>(m, "GR1HW")
+        .def(py::init<>())
+        .def("setup_robot", &GR1HW::setup_robot)
+        .def("write_pos", &GR1HW::write_pos)
+        .def("write_tor", &GR1HW::write_tor);
+};

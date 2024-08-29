@@ -10,7 +10,7 @@
 // #define TIMER
 
 
-bool GR1HW::init() {
+bool GR1HW::setup_robot() {
   default_joint_pos.setZero(TOTAL_JOINT_NUM+3); // leg + waist
   imu.initIMU();
 
