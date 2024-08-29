@@ -6,7 +6,7 @@
 2. anaconda
 3. eigen3
 4. rapidjson
-5. pubind11
+5. pybind11
 6. items in requirements.txt
 
 ## install
@@ -21,14 +21,13 @@ cmake ..
 make install
 ```
 
-## conda env
+ 2. conda env
 
 ```shell
-conda create -n thmos-gr1-deploy python=3.11
+conda create -n thmos-gr1-deploy python=3.10
 conda activate thmos-gr1-deploy
 pip install -r ./requirements.txt
 ```
-
 ## demo
 
 1. PrintRobotStates.py : Read robot sensors data.

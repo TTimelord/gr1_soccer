@@ -87,10 +87,6 @@ bool GR1HW::init() {
     exit(1);
   }
 
-  for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
-    jointData_[i].posDes_ = default_joint_pos[i];  // initialize jointData_[i].posDes_ to avoid jumping
-  }
-
   #ifndef ESTIMATION_ONLY
   for (int i = 0; i < TOTAL_JOINT_NUM+3; i++) {
       ret = fsa_list[i].Enable();
@@ -108,15 +104,7 @@ bool GR1HW::init() {
     arm_and_head_fsa_list[i].Enable();
     arm_and_head_fsa_list[i].EnablePosControl();
   }
-
-  std::this_thread::sleep_for(std::chrono::seconds(3));
-
-  if(!go_to_default_pos()){
-    exit(1);
-  }
   #endif
-
-  // exit(0);
 
   return true;
 }    
@@ -150,177 +138,75 @@ bool GR1HW::calculate_offset(){
   return true;
 }
 
-bool GR1HW::go_to_default_pos(){    
-  const double frequency = 500; // Hz
-  const double period = 1.0 / frequency;
-  const double duration = 5;
-  using clock = std::chrono::steady_clock;
-  using milliseconds = std::chrono::milliseconds;
-
-  auto start_time = clock::now();
-  auto next_time = clock::now() + milliseconds(static_cast<int>(1000 / frequency));
-
-  for (int i = 0; i < TOTAL_JOINT_NUM+3; ++i) {
-    fsa_list[i].GetPVC(read_joint_pos[i], read_joint_vel[i], read_joint_torq[i]);
-    write_joint_pos[i] = default_joint_pos[i];
-  }
-
-  serial_to_parallel();
-  std::vector<double> velocity(write_joint_pos.size());
-  std::vector<double> delta_pos(write_joint_pos.size());
-  std::vector<double> target_pos(write_joint_pos.size());
-  for (int i = 0; i < TOTAL_JOINT_NUM+3; ++i) {
-    target_pos[i] = (write_joint_pos[i] - pos_offset[i]) * 180/PI * motor_dir[i];
-    velocity[i] = (target_pos[i] - read_joint_pos[i])/duration;
-    delta_pos[i] = (target_pos[i] - read_joint_pos[i])/(frequency*duration);
-    write_joint_pos[i] = read_joint_pos[i];
-  }
-
-  while (true) {
-      auto now = clock::now();
-      if(now > start_time + milliseconds(int(1000*duration))){
-        break;
-      }
-      if (now < next_time) {
-          now = clock::now();
-          continue;
-      }
-
-      // Your loop code here
-      for (int i = 0; i < TOTAL_JOINT_NUM+3; ++i) {
-        fsa_list[i].GetPVC(read_joint_pos[i], read_joint_vel[i], read_joint_torq[i]);
-      }
-
-      // serial_to_parallel();
-
-      for (int i = 0; i < TOTAL_JOINT_NUM+3; ++i) {
-        // write_joint_pos[i] = (write_joint_pos[i] - pos_offset[i]) * 180/PI * motor_dir[i];
-
-        write_joint_pos[i] += delta_pos[i];
-        // std::cout<<i<<" "<<write_joint_pos[i]<<" "<<velocity[i]<<std::endl;
-        // std::cout<<read_joint_pos[i]<<std::endl;
-        last_cmd_pos[i] = write_joint_pos[i];
-        fsa_list[i].SetPosition(write_joint_pos[i], 0, 0);
-      }
-
-      // Update the time for the next iteration
-      next_time += milliseconds(static_cast<int>(period * 1000));
-      // std::cout<<std::chrono::duration_cast<milliseconds>(next_time.time_since_epoch()).count()<<std::endl;
-  }
-
-  return true;
-}
-
-void GR1HW::read() {
-  #ifdef TIMER
-  auto read_start_time = std::chrono::steady_clock::now();
-  #endif
-
+std::vector<double> GR1HW::read(){
   for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
     fsa_list[i].GetPVC(current_motor_pos[i], current_motor_vel[i], current_motor_cur[i]); // TODO: current to tau conversion required
     read_joint_pos[i] = motor_dir[i] * (PI / 180 * current_motor_pos[i]) + pos_offset[i];
     read_joint_vel[i] = motor_dir[i] * PI / 180 * current_motor_vel[i];
-
-    // joint_state_gr1.header.stamp = ros::Time::now();
-    // joint_state_gr1.position[i] = current_motor_pos[i];
-    // joint_state_gr1.velocity[i] = current_motor_vel[i];
-    // joint_state_gr1.effort[i] = current_motor_cur[i];
-
     std::cerr<<"read motor "<<i<<" pos: "<< current_motor_pos[i] << "vel: "<< current_motor_vel[i] << "torq:" << read_joint_torq[i] <<"\n";
   }
-  // debug_joint_pub.publish(joint_state_gr1);
 
   parallel_to_serial();
-
-  for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
-    jointData_[i].pos_ = read_joint_pos[i];
-    jointData_[i].vel_ = read_joint_vel[i];
-    jointData_[i].tau_ = read_joint_torq[i];
-    // std::cout<<"read joint "<<i<<" pos: "<< read_joint_pos[i] << "vel: "<< read_joint_vel[i] << "torq:" << read_joint_torq[i] <<"\n";
-  }
 
   Eigen::Quaterniond quaternion = Eigen::AngleAxisd(imu.imudata(0), Eigen::Vector3d::UnitZ()) *
                                   Eigen::AngleAxisd(imu.imudata(1), Eigen::Vector3d::UnitY()) *
                                   Eigen::AngleAxisd(imu.imudata(2), Eigen::Vector3d::UnitX());
   
-  imuData_.ori_[0] = quaternion.coeffs()(0);
-  imuData_.ori_[1] = quaternion.coeffs()(1);
-  imuData_.ori_[2] = quaternion.coeffs()(2);
-  imuData_.ori_[3] = quaternion.coeffs()(3);
-  imuData_.angularVel_[0] = imu.imudata(3);
-  imuData_.angularVel_[1] = imu.imudata(4);
-  imuData_.angularVel_[2] = imu.imudata(5);
-  imuData_.linearAcc_[0] = imu.imudata(6);
-  imuData_.linearAcc_[1] = imu.imudata(7);
-  imuData_.linearAcc_[2] = imu.imudata(8);
+  sensor_data[0] = quaternion.coeffs()(0);
+  sensor_data[1] = quaternion.coeffs()(1);
+  sensor_data[2] = quaternion.coeffs()(2);
+  sensor_data[3] = quaternion.coeffs()(3);
+  sensor_data[4] = imu.imudata(3);
+  sensor_data[5] = imu.imudata(4);
+  sensor_data[6] = imu.imudata(5);
+  sensor_data[7] = imu.imudata(6);
+  sensor_data[8] = imu.imudata(7);
+  sensor_data[9] = imu.imudata(8);
 
-  // joint_state_gr1.header.stamp = ros::Time::now();
-  // joint_state_gr1.position[0] = imuData_.angularVel_[0];
-  // joint_state_gr1.position[1] =  imuData_.angularVel_[1];
-  // joint_state_gr1.position[2] =  imuData_.angularVel_[2];
-  // debug_joint_pub.publish(joint_state_gr1);
-
-  // std::cout<<imu.imudata(0)<<" "<<imu.imudata(1)<<" "<<imu.imudata(2)<<std::endl;
-  // std::cout<<imuData_.ori_[0]<<" "<<imuData_.ori_[1]<<" "<<imuData_.ori_[2]<<" "<<imuData_.ori_[3]<<std::endl;
-  // std::cout<<imuData_.angularVel_[0]<<" "<<imuData_.angularVel_[1]<<" "<<imuData_.angularVel_[2]<<std::endl;
-  // std::cout<<imuData_.linearAcc_[0]<<" "<<imuData_.linearAcc_[1]<<" "<<imuData_.linearAcc_[2]<<std::endl;
-  // std::cout<<"===============\n";
-  #ifdef TIMER
-  auto read_end_time = std::chrono::steady_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(read_end_time - read_start_time);
-  if (duration.count() > 500){
-    std::cout<<"read time: "<<duration.count()<<" microseconds\n";
+  for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
+    sensor_data[i + 10] = read_joint_pos[i];
+    sensor_data[i + 10 + 12] = read_joint_vel[i];
+    sensor_data[i + 10 + 24] = read_joint_torq[i];
   }
-  #endif
+  return sensor_data;
 }
 
-void GR1HW::write() {
-  #ifdef TIMER
-  auto write_start_time = std::chrono::steady_clock::now();
-  #endif
+void GR1HW::write_tor(std::vector<double> target_torque) {
+
   for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
-    write_joint_pos[i] = jointData_[i].posDes_;
-    write_joint_vel[i] = jointData_[i].velDes_;
-    write_joint_torq[i] = jointData_[i].ff_;
-    // std::cout<<"write joint "<<i<<" pos: "<< write_joint_pos[i] << "vel: "<< write_joint_vel[i]<< "torq:" << write_joint_torq[i] <<"\n";
+    write_joint_torq[i] = target_torque[i];
   }
 
   serial_to_parallel();
 
   for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
-    // std::cout<<"write joint "<<i<<" pos: "<< write_joint_pos[i] << "torq:" << write_joint_torq[i] <<"\n";
-    write_joint_pos[i] = (write_joint_pos[i] - pos_offset[i]) * 180/PI * motor_dir[i];
-    write_joint_vel[i] = write_joint_vel[i] * 180/PI * motor_dir[i];
     write_joint_current[i] = torque_to_current(i, write_joint_torq[i]);
-
     double filtered_current = (1 - cur_lpf_ratio) * last_cmd_cur[i] + cur_lpf_ratio * write_joint_current[i];
     last_cmd_cur[i] = filtered_current;
+    fsa_list[i].SetCurrent(filtered_current);
+  }
+}
+
+void GR1HW::write_pos(std::vector<double> target_position) {
+
+  for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
+    write_joint_pos[i] = target_position[i];
+    write_joint_vel[i] = 0;
+    write_joint_torq[i] = 0;
+  }
+
+  serial_to_parallel();
+
+  for (int i = 0; i < TOTAL_JOINT_NUM; ++i) {
+    write_joint_pos[i] = (write_joint_pos[i] - pos_offset[i]) * 180/PI * motor_dir[i];
     double filtered_pos = (1 - pos_lpf_ratio) * last_cmd_pos[i] + pos_lpf_ratio * write_joint_pos[i];
     last_cmd_pos[i] = filtered_pos;
-    double filtered_vel = (1 - vel_lpf_ratio) * last_cmd_vel[i] + vel_lpf_ratio * write_joint_vel[i];
-    last_cmd_vel[i] = filtered_vel;
-    
-
-    // std::cout<<"write joint "<<i<<" pos: "<< filtered_pos << "vel: "<< filtered_vel<< "current:" << filtered_current <<"\n";
-
     if (filtered_pos - current_motor_pos[i] > 30 || filtered_pos - current_motor_pos[i] < - 30){
       disable_all_motors();
       exit(1);
     }
-    fsa_list[i].SetPosition(filtered_pos, filtered_vel*0.5, filtered_current);
-    // std::cout<<"write joint "<<i<<" pos: "<< write_joint_pos[i] << "current: "<< current<< "torq:" << write_joint_torq[i] <<"\n";
-    // std::cout<<i<<" pos: "<< write_joint_pos[i] - current_motor_pos[i] << 
-    //         "vel: "<< write_joint_vel[i] - current_motor_vel[i]<< "current:" << current - current_motor_cur[i] <<"\n";
-
-    // last_cmd_pos[i] = write_joint_pos[i];
+    fsa_list[i].SetPosition(filtered_pos, 0.0, 0.0);
   }
-  #ifdef TIMER
-  auto write_end_time = std::chrono::steady_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(write_end_time - write_start_time);
-  if (duration.count() > 500){
-    std::cout<<"write time: "<<duration.count()<<" microseconds\n";
-  }
-  #endif
 }
 
 bool GR1HW::disable_all_motors(){
@@ -405,8 +291,6 @@ bool GR1HW::serial_to_parallel(){
 
 double GR1HW::torque_to_current(int index, double torque){
   double current = torque * motor_dir[index]/(ratio[index]*scale[index]);
-  // current = std::min(current, current_bound[index]);
-  // current = std::max(current, -current_bound[index]);
   return current;
 }
 

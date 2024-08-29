@@ -35,8 +35,9 @@ class GR1HW
 {
   public:
   bool init() ;
-  void read();
-  void write();
+  std::vector<double>  read();
+  void write_pos(std::vector<double> target_position);
+  void write_tor(std::vector<double> target_torque);
   ~GR1HW();
 
 private:
@@ -53,10 +54,6 @@ private:
   double current_to_torque(int index, double torque);
 
   bool disable_all_motors();
-
-
-  MotorData jointData_[12]{};  // NOLINT(modernize-avoid-c-arrays)
-  ImuData imuData_{};
   
   std::string referenceFile;
   std::string motorlistFile;
@@ -115,13 +112,14 @@ private:
   const double vel_lpf_ratio = 0.05;
 
   const std::vector<double> current_bound = {7, 9, 45, 45, 2.4, 2.4, 7, 9, 45, 45, 2.4, 2.4};
+  std::vector<double> sensor_data = std::vector<double>(TOTAL_JOINT_NUM * 3 + 10); // quat, anguler vel,linear acc, jpos, jvel, jtor
 
 };
 
 
 PYBIND11_MODULE(gr1_sdk, m){
     py::class_<GR1HW>(m, "GR1")
-        .def(py::init<>())
+        .def(py::init<>());
         //.def("read", &GR1HW::read)
         //.def("write", &GR1HW::read);
 }
