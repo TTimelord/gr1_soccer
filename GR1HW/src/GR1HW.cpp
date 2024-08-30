@@ -6,11 +6,8 @@
 #include <thread>
 #include <FsaConfig.h>
 
-// #define ESTIMATION_ONLY
-// #define TIMER
 
-
-bool GR1HW::setup_robot() {
+bool GR1HW::setup_robot(bool ENABLE_MOTOR) {
   default_joint_pos.setZero(TOTAL_JOINT_NUM+3); // leg + waist
   imu.initIMU();
 
@@ -87,24 +84,24 @@ bool GR1HW::setup_robot() {
     exit(1);
   }
 
-  #ifndef ESTIMATION_ONLY
-  for (int i = 0; i < TOTAL_JOINT_NUM+3; i++) {
-      ret = fsa_list[i].Enable();
-      if (ret < 0) {
-          std::cout << "wrong" << std::endl;
-          exit(0);
-      }
-  }
+  if(ENABLE_MOTOR){
+    for (int i = 0; i < TOTAL_JOINT_NUM+3; i++) {
+        ret = fsa_list[i].Enable();
+        if (ret < 0) {
+            std::cout << "wrong" << std::endl;
+            exit(0);
+        }
+    }
 
-  for (int i = 0; i < TOTAL_JOINT_NUM+3; i++) {
-      fsa_list[i].EnablePosControl();
-  }
+    for (int i = 0; i < TOTAL_JOINT_NUM+3; i++) {
+        fsa_list[i].EnablePosControl();
+    }
 
-  for (int i = 0; i<arm_and_head_ip_list.size(); i++) {
-    arm_and_head_fsa_list[i].Enable();
-    arm_and_head_fsa_list[i].EnablePosControl();
+    for (int i = 0; i<arm_and_head_ip_list.size(); i++) {
+      arm_and_head_fsa_list[i].Enable();
+      arm_and_head_fsa_list[i].EnablePosControl();
+    } 
   }
-  #endif
 
   return true;
 }    

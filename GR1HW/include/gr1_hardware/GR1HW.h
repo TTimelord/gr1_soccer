@@ -35,21 +35,22 @@ class GR1HW
 {
 
 public:
-  GR1HW(){};
 
-  bool setup_robot();
+  bool setup_robot(bool ENABLE_MOTOR);
   std::vector<double> read();
 
   void write_pos(std::vector<double> target_position);
   void write_tor(std::vector<double> target_torque);
 
   bool disable_all_motors();
+
   ~GR1HW();
+  GR1HW(const std::string motor_info){motorlistFile = motor_info;}
+
 
 private:
 
   bool setupImu();
-
   bool calculate_offset();
   bool go_to_default_pos();
 
@@ -59,7 +60,6 @@ private:
   double torque_to_current(int index, double torque);
   double current_to_torque(int index, double torque);
   
-  std::string referenceFile;
   std::string motorlistFile;
 
   ch108::ch108IMU imu;
@@ -123,7 +123,7 @@ private:
 
 PYBIND11_MODULE(GR1HW, m){
     py::class_<GR1HW>(m, "GR1HW")
-        .def(py::init<>())
+        .def(py::init<const std::string>())
         .def("setup_robot", &GR1HW::setup_robot)
         .def("write_pos", &GR1HW::write_pos)
         .def("write_tor", &GR1HW::write_tor);
