@@ -140,7 +140,6 @@ std::vector<double> GR1HW::read(){
     fsa_list[i].GetPVC(current_motor_pos[i], current_motor_vel[i], current_motor_cur[i]); // TODO: current to tau conversion required
     read_joint_pos[i] = motor_dir[i] * (PI / 180 * current_motor_pos[i]) + pos_offset[i];
     read_joint_vel[i] = motor_dir[i] * PI / 180 * current_motor_vel[i];
-    std::cerr<<"read motor "<<i<<" pos: "<< current_motor_pos[i] << "vel: "<< current_motor_vel[i] << "torq:" << read_joint_torq[i] <<"\n";
   }
 
   parallel_to_serial();

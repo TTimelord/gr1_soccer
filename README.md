@@ -26,7 +26,7 @@ sudo cp /thmos_gr1/GR1HW/lib/parallel_ankle/libParallelAnkle.so /usr/lib/libPara
 3. sdk build
 
 ```shell
-cd gr1_sdk
+cd GR1HW
 mkdir build
 cd build
 cmake ..
@@ -65,7 +65,7 @@ sudo apt-get install libeigen3-dev
 3. pybind 11:
 
 ```shell
-cd gr1_sdk
+cd GR1HW
 git clone git@github.com:pybind/pybind11.git
 cd pybind11
 mkdir build

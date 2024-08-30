@@ -6,6 +6,7 @@
 #include <main.h>
 #include <Eigen/Dense>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 namespace py = pybind11;
 
 #define TOTAL_JOINT_NUM 12  // total number of joints for legs
@@ -125,6 +126,7 @@ PYBIND11_MODULE(GR1HW, m){
     py::class_<GR1HW>(m, "GR1HW")
         .def(py::init<const std::string>())
         .def("setup_robot", &GR1HW::setup_robot)
+        .def("read", &GR1HW::read)
         .def("write_pos", &GR1HW::write_pos)
         .def("write_tor", &GR1HW::write_tor);
 };
